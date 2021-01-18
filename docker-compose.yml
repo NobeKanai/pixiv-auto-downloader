@@ -1,0 +1,12 @@
+version: "3"
+
+services:
+  pad:
+    build: .
+    container_name: pad
+    volumes:
+      - ./images:/app/images
+      - ./config.yaml:/config.yaml
+
+networks:
+  default:

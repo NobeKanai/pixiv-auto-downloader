@@ -1,0 +1,12 @@
+artists:
+  - id: 6957790
+    subdir: "WsMan" # optional
+  - id: 25891894
+
+service:
+  basedir: ./images
+  proxy: "http://localhost:7890" # optional
+  interval: 300 # 单位秒
+  username: "your username"
+  password: "your password"
+  token: "your token" # 程序每次运行都会生成token（可能相同）， 可以在第一次运行后粘贴到此处， 用于防止重复登陆
