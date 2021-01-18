@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import time
 from typing import List
 import telegram
 
@@ -27,10 +28,20 @@ class TelegramBot:
                     "what the fuck happened with this holly shit file: ", file)
 
         for path in real_paths:
-            if isinstance(path, list):
-                self._push_photos(path)
-            else:
-                self._push_photo(path)
+            while True:
+                try:
+                    if isinstance(path, list):
+                        self._push_photos(path)
+                    else:
+                        self._push_photo(path)
+
+                except telegram.error.RetryAfter as e:
+                    logging.warn(
+                        "telegram server: retry after {} seconds".format(
+                            e.retry_after))
+                    time.sleep(e.retry_after)
+                    continue
+                break
 
     def push_msg(self, msg: str):
         self._bot.send_message(self.chat_id, msg)

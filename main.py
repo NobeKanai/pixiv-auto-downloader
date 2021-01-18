@@ -60,6 +60,9 @@ if __name__ == "__main__":
     bot_config = config['bot']
     tg_bot = TelegramBot(bot_config['token'], bot_config['chatid'])
 
+    interval = config['service'].get('interval', 600)
+    logging.info("start program with interval {} seconds".format(interval))
+
     while True:
         for a in artists:
             paths = a.download()
@@ -67,10 +70,12 @@ if __name__ == "__main__":
             if not paths:
                 continue
 
-            tg_bot.push_pics(paths)
-            tg_bot.push_msg("Artist: {} updates {} arts. All Saved.".format(
-                a.subdir, len(paths)))
+            try:
+                tg_bot.push_pics(paths)
+                tg_bot.push_msg(
+                    "Artist: {} updates {} arts. All Saved.".format(
+                        a.subdir, len(paths)))
+            except Exception as e:
+                logging.error(e)
 
-        interval = config['service'].get('interval', 600)
-        logging.info("start program with interval {} seconds".format(interval))
         time.sleep(interval)

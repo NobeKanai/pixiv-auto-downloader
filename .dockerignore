@@ -3,3 +3,4 @@ images
 .vscode
 __pycache__
 *test.py
+config.yaml
