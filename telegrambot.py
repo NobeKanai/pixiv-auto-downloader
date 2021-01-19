@@ -28,32 +28,39 @@ class TelegramBot:
                     "what the fuck happened with this holly shit file: ", file)
 
         for path in real_paths:
-            while True:
-                try:
-                    if isinstance(path, list):
-                        self._push_photos(path)
-                    else:
-                        self._push_photo(path)
 
-                except telegram.error.RetryAfter as e:
-                    logging.warn(
-                        "telegram server: retry after {} seconds".format(
-                            e.retry_after))
-                    time.sleep(e.retry_after)
-                    continue
-                break
+            def f():
+                if isinstance(path, list):
+                    self._push_photos(path)
+                else:
+                    self._push_photo(path)
+
+            self._limit_do(f)
 
     def push_msg(self, msg: str):
-        self._bot.send_message(self.chat_id, msg)
+        def f():
+            self._bot.send_message(self.chat_id, msg)
+
+        self._limit_do(f)
 
     def _push_photos(self, paths):
-        media_list = []
         try:
+            tmp = 0
+            media_list = []
             for p in paths:
+                if tmp >= 10:
+                    self._bot.send_media_group(self.chat_id, media_list)
+
+                    tmp = 0
+                    media_list.clear()
+
                 media_list.append(telegram.InputMediaPhoto(open(p, "rb")))
+                tmp += 1
+
             self._bot.send_media_group(self.chat_id, media_list)
+
         except telegram.error.BadRequest as e:
-            logging.warning("bad requeset with warning message: " + e.message)
+            logging.warning("bad requeset with error message: " + e.message)
             for p in paths:
                 self._bot.send_document(self.chat_id, open(p, 'rb'))
 
@@ -63,3 +70,21 @@ class TelegramBot:
         except telegram.error.BadRequest as e:
             logging.warning("bad requeset with error message: " + e.message)
             self._bot.send_document(self.chat_id, open(path, 'rb'))
+
+    def _limit_do(self, f):
+        try_times = 0
+        while True:
+            if try_times >= 3:
+                logging.warn("too much retry times... skipped")
+                break
+
+            try:
+                f()
+            except telegram.error.RetryAfter as e:
+                logging.warn("telegram server: retry after {} seconds".format(
+                    e.retry_after))
+                time.sleep(e.retry_after)
+
+                try_times += 1
+                continue
+            break
