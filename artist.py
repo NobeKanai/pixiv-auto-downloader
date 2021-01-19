@@ -54,8 +54,11 @@ class Artist:
 
             illust.download(directory=directory, size=Size.ORIGINAL)
             # add to path
-            suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
-            paths.insert(0, directory / (str(illust.id) + '.' + suffix))
+            if illust.image_urls[Size.ORIGINAL]:
+                suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
+                paths.insert(0, directory / (str(illust.id) + '.' + suffix))
+            else:
+                paths.insert(0, directory / str(illust.id))
 
             # update pic list
             self._update_pic_list(illust.id)
