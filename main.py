@@ -2,8 +2,9 @@ from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
 import yaml, time, os
-from pixivapi import Client
+from pixivapi import Client, errors
 import logging
+import traceback
 
 try:
     from yaml import CLoader as Loader
@@ -14,6 +15,22 @@ except ImportError:
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO)
+
+
+def login(client: Client, username, password):
+    try:
+        token = open('.token', 'r', encoding='utf-8').read()
+        client.authenticate(token)
+    except Exception:
+        logging.info(
+            "try token login failed, use username and password instead...")
+        client.login(username, password)
+
+    # save token
+    with open('.token', 'w', encoding='utf-8') as f:
+        f.write(client.refresh_token)
+    logging.info("new token saved to ./.token")
+
 
 if __name__ == "__main__":
     # load configuration
@@ -32,20 +49,8 @@ if __name__ == "__main__":
 
     # set client
     client = Client()
-    try:
-        token = serivce.get('token', None)
-        if not token:
-            token = open('.token', 'r', encoding='utf-8').read()
-        client.authenticate(token)
-    except Exception:
-        logging.info(
-            "try token login failed, use username and password instead...")
-        client.login(username, password)
 
-    # save token
-    with open('.token', 'w', encoding='utf-8') as f:
-        f.write(client.refresh_token)
-    logging.info("new token saved to ./.token")
+    login(client, username, password)
 
     # set artists list
     artists: List[Artist] = []
@@ -65,7 +70,16 @@ if __name__ == "__main__":
 
     while True:
         for a in artists:
-            paths = a.download()
+            paths = []
+
+            try:
+                paths = a.download()
+            except errors.BadApiResponse:
+                traceback.print_exc()
+                logging.info("wait for 20 seconds, and retry")
+                time.sleep(20)
+                login(client, username, password)
+                paths = a.download()
 
             if not paths:
                 continue
@@ -76,6 +90,6 @@ if __name__ == "__main__":
                     "Artist: {} updates {} arts. All Saved.".format(
                         a.subdir, len(paths)))
             except Exception as e:
-                logging.error(e)
+                traceback.print_exc()
 
         time.sleep(interval)
