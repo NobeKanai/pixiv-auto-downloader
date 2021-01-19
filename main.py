@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     while True:
         for a in artists:
-            paths = []
+            paths = None
 
             try:
                 paths = a.download()
@@ -90,6 +90,6 @@ if __name__ == "__main__":
                     "Artist: {} updates {} arts. All Saved.".format(
                         a.subdir, len(paths)))
             except Exception as e:
-                traceback.print_exc()
+                logging.error(e)
 
         time.sleep(interval)

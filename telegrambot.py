@@ -48,9 +48,18 @@ class TelegramBot:
 
     def _push_photos(self, paths):
         media_list = []
-        for p in paths:
-            media_list.append(telegram.InputMediaPhoto(open(p, "rb")))
-        self._bot.send_media_group(self.chat_id, media_list)
+        try:
+            for p in paths:
+                media_list.append(telegram.InputMediaPhoto(open(p, "rb")))
+            self._bot.send_media_group(self.chat_id, media_list)
+        except telegram.error.BadRequest as e:
+            logging.warning("bad requeset with warning message: " + e.message)
+            for p in paths:
+                self._bot.send_document(self.chat_id, open(p, 'rb'))
 
     def _push_photo(self, path):
-        self._bot.send_photo(self.chat_id, open(path, 'rb'))
+        try:
+            self._bot.send_photo(self.chat_id, open(path, 'rb'))
+        except telegram.error.BadRequest as e:
+            logging.warning("bad requeset with error message: " + e.message)
+            self._bot.send_document(self.chat_id, open(path, 'rb'))

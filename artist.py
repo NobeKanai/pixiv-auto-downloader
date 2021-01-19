@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List
 from pixivapi.client import Client
 from pixivapi.enums import Size
@@ -55,25 +54,40 @@ class Artist:
 
             illust.download(directory=directory, size=Size.ORIGINAL)
             # add to path
-            paths.append([
-                i for i in directory.iterdir()
-                if i.match(str(illust.id) + '*')
-            ][0])
+            suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
+            paths.insert(0, directory / (str(illust.id) + '.' + suffix))
 
             # update pic list
-            self.pic_list.append(illust.id)
-            if (length := len(self.pic_list)) > 30:
-                self.pic_list = self.pic_list[length - 30:]
+            self._update_pic_list(illust.id)
 
         return paths
 
     def _init_pic_list(self, dirpath: Path):
-        paths = sorted(dirpath.iterdir(), key=os.path.getmtime, reverse=True)
+        paths = []
+
+        for p in dirpath.iterdir():
+            if p.is_file():
+                paths.append(int(p.name.split('.')[0]))
+            else:
+                paths.append(int(p.name))
+
+        # sort by desc
+        paths.sort(reverse=True)
+
         if len(paths) > 30:
             paths = paths[:30]
 
-        for p in paths:
-            if p.is_file():
-                self.pic_list.insert(0, int(p.name.split('.')[0]))
-            else:
-                self.pic_list.insert(0, int(p.name))
+        self.pic_list = paths
+
+    def _update_pic_list(self, pid: int):
+        pl = self.pic_list
+
+        pl.insert(0, pid)
+
+        if len(pl) > 30:
+            pl.pop()
+
+        i = 0  # 冒泡排序
+        while i < len(pl) - 1 and pl[i] < pl[i + 1]:
+            pl[i], pl[i + 1] = pl[i + 1], self.pic_list[i]  # exchange value
+            i += 1
