@@ -4,10 +4,14 @@ services:
   pad:
     image: pad
     container_name: pad
+    restart: unless-stopped
     volumes:
       - ./images:/app/images
       - ./config.yaml:/app/config.yaml
       - ./token:/app/.token
+    environment:
+      - HTTP_PROXY=
+      - HTTPS_PROXY=
 
 networks:
   default:

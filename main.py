@@ -1,10 +1,12 @@
 from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
-import yaml, time, os
 from pixivapi import Client, errors
 import logging
 import traceback
+import yaml
+import time
+import os
 
 try:
     from yaml import CLoader as Loader
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     password = serivce['password']
 
     # set env
-    if proxy := serivce.get('proxy', None):
+    if (proxy := serivce.get('proxy')) and not os.environ.get('HTTPS_PROXY'):
         os.environ['HTTP_PROXY'] = proxy
         os.environ['HTTPS_PROXY'] = proxy
 

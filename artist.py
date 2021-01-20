@@ -3,6 +3,7 @@ from typing import List
 from pixivapi.client import Client
 from pixivapi.enums import Size
 from pathlib import Path
+from requests.exceptions import ProxyError
 
 
 class Artist:
@@ -22,13 +23,10 @@ class Artist:
 
         self.pic_list = []  # store recent pics for futher usage
 
-    def _download_all(self, directory):
-        """ download all pics which never exists in basepath """
-        pass
-
     def download(self) -> List[Path]:
         """ download start fetch recently updated arts from artist.
-        for first time running, it will fetch all pics and compare to local folder to find the difference
+        for first time running, it will fetch all pics and compare
+        to local folder to find the difference
         """
         # pad subfolder
         if not self.subdir:
@@ -45,23 +43,29 @@ class Artist:
 
         paths = []  # for return
 
-        response = self.client.fetch_user_illustrations(self.artist_id)
-        for illust in response['illustrations']:
-            if illust.id in self.pic_list:
-                logging.info("Artist {} ID {} skipped".format(
-                    self.subdir, illust.id))
-                continue
+        try:
+            response = self.client.fetch_user_illustrations(self.artist_id)
+            for illust in response['illustrations']:
+                if illust.id in self.pic_list:
+                    logging.info("Artist {} ID {} skipped".format(
+                        self.subdir, illust.id))
+                    continue
 
-            illust.download(directory=directory, size=Size.ORIGINAL)
-            # add to path
-            if illust.image_urls[Size.ORIGINAL]:
-                suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
-                paths.insert(0, directory / (str(illust.id) + '.' + suffix))
-            else:
-                paths.insert(0, directory / str(illust.id))
+                illust.download(directory=directory, size=Size.ORIGINAL)
+                # add to path
+                if illust.image_urls[Size.ORIGINAL]:
+                    suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
+                    paths.insert(0,
+                                 directory / (str(illust.id) + '.' + suffix))
+                else:
+                    paths.insert(0, directory / str(illust.id))
 
-            # update pic list
-            self._update_pic_list(illust.id)
+                # update pic list
+                self._update_pic_list(illust.id)
+        except ProxyError as e:
+            logging.error(
+                f"ProxyError when fetch user '{self.subdir}' illustrations:{e}"
+            )
 
         return paths
 
