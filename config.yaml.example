@@ -6,7 +6,7 @@ artists:
 service:
   basedir: ./images
   proxy: http://localhost:7890 # optional
-  interval: 600 # 单位秒
+  interval: 3600 # seconds
   username: "your username"
   password: "your password"
 
