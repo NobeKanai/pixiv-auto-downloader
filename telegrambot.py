@@ -22,7 +22,7 @@ class TelegramBot:
             if file.is_file():
                 real_paths.append(file)
             elif file.is_dir():
-                real_paths.append([f for f in file.iterdir()])
+                real_paths.append(sorted([f for f in file.iterdir()]))
             else:
                 logging.warn(
                     "what the fuck happened with this holly shit file: ", file)
