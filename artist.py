@@ -96,5 +96,5 @@ class Artist:
 
         i = 0  # 冒泡排序
         while i < len(pl) - 1 and pl[i] < pl[i + 1]:
-            pl[i], pl[i + 1] = pl[i + 1], self.pic_list[i]  # exchange value
+            pl[i], pl[i + 1] = pl[i + 1], pl[i]  # exchange value
             i += 1
