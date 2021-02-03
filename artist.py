@@ -47,7 +47,7 @@ class Artist:
             response = self.client.fetch_user_illustrations(self.artist_id)
             for illust in response['illustrations']:
                 if illust.id in self.pic_list:
-                    logging.info("Artist {} ID {} skipped".format(
+                    logging.debug("Artist {} ID {} skipped".format(
                         self.subdir, illust.id))
                     continue
 
@@ -94,7 +94,7 @@ class Artist:
         if len(pl) > 30:
             pl.pop()
 
-        i = 0  # 冒泡排序
+        i = 0  # bubble sort
         while i < len(pl) - 1 and pl[i] < pl[i + 1]:
             pl[i], pl[i + 1] = pl[i + 1], pl[i]  # exchange value
             i += 1

@@ -16,7 +16,7 @@ except ImportError:
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=os.environ.get("LOG_LEVEL", "WARNING"))
+    level=os.environ.get("LOG_LEVEL", "INFO"))
 
 
 def login(client: Client, username, password):

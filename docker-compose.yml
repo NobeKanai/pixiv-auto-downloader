@@ -12,7 +12,7 @@ services:
     environment:
       - HTTP_PROXY=
       - HTTPS_PROXY=
-      - LOG_LEVEL=WARNING
+      - LOG_LEVEL=INFO
 
 networks:
   default:

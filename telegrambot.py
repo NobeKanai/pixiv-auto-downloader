@@ -75,14 +75,15 @@ class TelegramBot:
         try_times = 0
         while True:
             if try_times >= 3:
-                logging.warn("too much retry times... skipped")
+                logging.warning("too much retry times... skipped")
                 break
 
             try:
                 f()
             except telegram.error.RetryAfter as e:
-                logging.warn("telegram server: retry after {} seconds".format(
-                    e.retry_after))
+                logging.warning(
+                    "telegram server: retry after {} seconds".format(
+                        e.retry_after))
                 time.sleep(e.retry_after)
 
                 try_times += 1
