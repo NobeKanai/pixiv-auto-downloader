@@ -2,6 +2,8 @@ from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
 from pixivapi import Client, errors
+from watchgod import run_process
+from pathlib import Path
 import logging
 import traceback
 import yaml
@@ -17,6 +19,9 @@ except ImportError:
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=os.environ.get("LOG_LEVEL", "INFO"))
+
+CONFIG_FILE = Path("config.yaml")
+assert CONFIG_FILE.exists()
 
 
 def login(client: Client, username, password):
@@ -34,9 +39,9 @@ def login(client: Client, username, password):
     logging.info("new token saved to ./.token")
 
 
-if __name__ == "__main__":
+def start():
     # load configuration
-    config_text = open('config.yaml', 'r', encoding='utf-8').read()
+    config_text = open(CONFIG_FILE, 'r', encoding='utf-8').read()
     config = yaml.load(config_text, Loader=Loader)
 
     serivce = config['service']
@@ -44,7 +49,7 @@ if __name__ == "__main__":
     username = serivce['username']
     password = serivce['password']
 
-    # set env
+    # set env. only for test
     if (proxy := serivce.get('proxy')) and not os.environ.get('HTTPS_PROXY'):
         os.environ['HTTP_PROXY'] = proxy
         os.environ['HTTPS_PROXY'] = proxy
@@ -95,3 +100,7 @@ if __name__ == "__main__":
                 logging.error(e)
 
         time.sleep(interval)
+
+
+if __name__ == '__main__':
+    run_process(CONFIG_FILE, start)
