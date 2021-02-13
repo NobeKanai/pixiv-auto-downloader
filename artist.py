@@ -46,7 +46,7 @@ class Artist:
         try:
             response = self.client.fetch_user_illustrations(self.artist_id)
             for illust in response['illustrations']:
-                if illust.id in self.pic_list:
+                if self._exists(illust.id, directory):
                     logging.debug("Artist {} ID {} skipped".format(
                         self.subdir, illust.id))
                     continue
@@ -68,6 +68,15 @@ class Artist:
             )
 
         return paths
+
+    def _exists(self, illust_id: int, directory: Path) -> bool:
+        if illust_id in self.pic_list:
+            return True
+
+        if list(directory.glob(str(illust_id) + '*')):
+            return True
+
+        return False
 
     def _init_pic_list(self, dirpath: Path):
         paths = []
