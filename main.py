@@ -93,9 +93,9 @@ def start():
 
             try:
                 tg_bot.push_pics(paths)
-                tg_bot.push_msg(
-                    "Artist: {} updates {} arts. All Saved.".format(
-                        a.subdir, len(paths)))
+                tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
+                    a.subdir, len(paths),
+                    "works" if len(paths) > 1 else "work"))
             except Exception as e:
                 logging.error(e)
 
