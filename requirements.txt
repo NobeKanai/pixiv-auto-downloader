@@ -1,4 +1,4 @@
-APScheduler==3.7.0
+APScheduler==3.6.3
 astroid==2.5
 atomicwrites==1.4.0
 attrs==20.3.0
