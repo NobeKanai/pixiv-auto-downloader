@@ -134,12 +134,15 @@ class Artist:
             i += 1
 
     def _fetch_user_illustrations(self) -> List[Illustration]:
+        illustrations: List[Illustration] = []
+
         # if not initalized fetching, fetch once
         if self._initialized:
-            return self.client.fetch_user_illustrations(
+            illustrations = self.client.fetch_user_illustrations(
                 self.artist_id)['illustrations']
-
-        illustrations: List[Illustration] = []
+            if len(illustrations) > self.size:
+                return illustrations[:self.size]
+            return illustrations
 
         offset = 0
         while True:
