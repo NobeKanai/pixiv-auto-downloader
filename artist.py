@@ -62,19 +62,14 @@ class Artist:
                     ))
                     continue
 
-                # if one of tags in ignored tags, skip
-                for tag in illust.tags:
-                    if tag['name'] in self.ignored_tags:
-                        logging.debug(
-                            "Artist {} ID {} includes tag '{}', skipped".
-                            format(
-                                self.subdir,
-                                self.artist_id,
-                                tag['name'],
-                            ))
+                if not self._is_valid(illust):
+                    logging.debug("Artist {} ID {} is invalid, skipped".format(
+                        self.subdir,
+                        self.artist_id,
+                    ))
 
-                        self._update_pic_list(illust.id)
-                        continue
+                    self._update_pic_list(illust.id)
+                    continue
 
                 illust.download(directory=directory, size=Size.ORIGINAL)
                 # add to path
@@ -132,6 +127,12 @@ class Artist:
         while i < len(pl) - 1 and pl[i] < pl[i + 1]:
             pl[i], pl[i + 1] = pl[i + 1], pl[i]  # exchange value
             i += 1
+
+    def _is_valid(self, illust: Illustration) -> bool:
+        for tag in illust.tags:
+            if tag['name'] in self.ignored_tags:
+                return False
+        return True
 
     def _fetch_user_illustrations(self) -> List[Illustration]:
         illustrations: List[Illustration] = []
