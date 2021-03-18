@@ -2,6 +2,8 @@ artists:
   - id: 6957790
     subdir: "WsMan" # optional
   - id: 25891894
+    ignored-tags:
+      - かるたも
 
 service:
   basedir: ./images
@@ -9,6 +11,8 @@ service:
   interval: 3600 # seconds
   username: "your username"
   password: "your password"
+  ignored-tags:
+    - 抱き枕カバー
 
 bot:
   token: "your bot token"

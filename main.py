@@ -59,13 +59,21 @@ def start():
 
     login(client, username, password)
 
+    # get common ignored tags
+    ignored_tags = serivce.get('ignored-tags', [])
+
     # set artists list
     artists: List[Artist] = []
     for user in config['artists']:
-        a = Artist(user['id'],
-                   basedir,
-                   client,
-                   subdir=user.get('subdir', None))
+        ignored_tags_artist = user.get('ignored-tags', [])
+
+        a = Artist(
+            user['id'],
+            basedir,
+            client,
+            subdir=user.get('subdir', None),
+            ignored_tags=ignored_tags + ignored_tags_artist,
+        )
         artists.append(a)
 
     # set bot

@@ -15,11 +15,13 @@ class Artist:
                  artist_id: str,
                  basedir: str,
                  client: Client,
-                 subdir: str = None) -> None:
+                 subdir: str = None,
+                 ignored_tags: List[str] = []) -> None:
         self.artist_id = artist_id
         self.basedir = basedir
         self.subdir = subdir
         self.client = client
+        self.ignored_tags = set(ignored_tags)
 
         self.pic_list = []  # store recent pics for futher usage
 
@@ -46,10 +48,25 @@ class Artist:
         try:
             response = self.client.fetch_user_illustrations(self.artist_id)
             for illust in response['illustrations']:
+                # if exists in directory, skip
                 if self._exists(illust.id, directory):
                     logging.debug("Artist {} ID {} skipped".format(
-                        self.subdir, illust.id))
+                        self.subdir,
+                        illust.id,
+                    ))
                     continue
+
+                # if one of tags in ignored tags, skip
+                for tag in illust.tags:
+                    if tag['name'] in self.ignored_tags:
+                        logging.debug(
+                            "Artist {} ID {} includes tag '{}', skipped".
+                            format(
+                                self.subdir,
+                                self.artist_id,
+                                tag['name'],
+                            ))
+                        continue
 
                 illust.download(directory=directory, size=Size.ORIGINAL)
                 # add to path
