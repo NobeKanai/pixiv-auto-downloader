@@ -2,6 +2,7 @@ import logging
 from typing import List
 from pixivapi.client import Client
 from pixivapi.enums import Size
+from pixivapi.models import Illustration
 from pathlib import Path
 from requests.exceptions import ProxyError
 
@@ -15,12 +16,14 @@ class Artist:
                  artist_id: str,
                  basedir: str,
                  client: Client,
+                 size: int = 30,
                  subdir: str = None,
                  ignored_tags: List[str] = []) -> None:
         self.artist_id = artist_id
         self.basedir = basedir
         self.subdir = subdir
         self.client = client
+        self.size = size
         self.ignored_tags = set(ignored_tags)
 
         self.pic_list = []  # store recent pics for futher usage
@@ -46,8 +49,8 @@ class Artist:
         paths = []  # for return
 
         try:
-            response = self.client.fetch_user_illustrations(self.artist_id)
-            for illust in response['illustrations']:
+            illustrations = self._fetch_user_illustrations()
+            for illust in illustrations:
                 # if exists in directory, skip
                 if self._exists(illust.id, directory):
                     logging.debug("Artist {} ID {} skipped".format(
@@ -66,6 +69,8 @@ class Artist:
                                 self.artist_id,
                                 tag['name'],
                             ))
+
+                        self._update_pic_list(illust.id)
                         continue
 
                 illust.download(directory=directory, size=Size.ORIGINAL)
@@ -107,8 +112,8 @@ class Artist:
         # sort by desc
         paths.sort(reverse=True)
 
-        if len(paths) > 30:
-            paths = paths[:30]
+        if len(paths) > self.size:
+            paths = paths[:self.size]
 
         self.pic_list = paths
 
@@ -117,10 +122,34 @@ class Artist:
 
         pl.insert(0, pid)
 
-        if len(pl) > 30:
+        if len(pl) > self.size:
             pl.pop()
 
         i = 0  # bubble sort
         while i < len(pl) - 1 and pl[i] < pl[i + 1]:
             pl[i], pl[i + 1] = pl[i + 1], pl[i]  # exchange value
             i += 1
+
+    def _fetch_user_illustrations(self) -> List[Illustration]:
+        illustrations: List[Illustration] = []
+
+        offset = 0
+        while True:
+            response = self.client.fetch_user_illustrations(
+                self.artist_id,
+                offset=offset,
+            )
+
+            ils = response['illustrations']
+            if len(illustrations) + len(ils) >= self.size:
+                ends = self.size - len(illustrations) or None
+                illustrations.extend(ils[:ends])
+                break
+
+            illustrations.extend(ils)
+
+            offset = response['next']
+            if not offset:
+                break
+
+        return illustrations

@@ -66,11 +66,13 @@ def start():
     artists: List[Artist] = []
     for user in config['artists']:
         ignored_tags_artist = user.get('ignored-tags', [])
+        size = user.get('size', 30)
 
         a = Artist(
             user['id'],
             basedir,
             client,
+            size=size,
             subdir=user.get('subdir', None),
             ignored_tags=ignored_tags + ignored_tags_artist,
         )
