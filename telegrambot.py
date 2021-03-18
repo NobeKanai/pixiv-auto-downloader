@@ -88,4 +88,10 @@ class TelegramBot:
 
                 try_times += 1
                 continue
+
+            except telegram.error.TimedOut:
+                logging.warning("telegram server time out: retry after 20s.")
+                time.sleep(20)
+
+                continue
             break
