@@ -28,6 +28,9 @@ class Artist:
 
         self.pic_list = []  # store recent pics for futher usage
 
+        # private attributes for private methods
+        self._initialized = False
+
     def download(self) -> List[Path]:
         """ download start fetch recently updated arts from artist.
         for first time running, it will fetch all pics and compare
@@ -131,6 +134,11 @@ class Artist:
             i += 1
 
     def _fetch_user_illustrations(self) -> List[Illustration]:
+        # if not initalized fetching, fetch once
+        if self._initialized:
+            return self.client.fetch_user_illustrations(
+                self.artist_id)['illustrations']
+
         illustrations: List[Illustration] = []
 
         offset = 0
@@ -141,6 +149,7 @@ class Artist:
             )
 
             ils = response['illustrations']
+
             if len(illustrations) + len(ils) >= self.size:
                 ends = self.size - len(illustrations) or None
                 illustrations.extend(ils[:ends])
@@ -151,5 +160,8 @@ class Artist:
             offset = response['next']
             if not offset:
                 break
+
+        # initialized
+        self._initialized = True
 
         return illustrations
