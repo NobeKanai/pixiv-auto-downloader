@@ -9,7 +9,6 @@ cloudscraper==1.2.56
 colorama==0.4.4
 cryptography==3.4.6
 decorator==4.4.2
-flake8==3.8.4
 idna==2.10
 iniconfig==1.1.1
 isort==5.7.0
@@ -36,4 +35,3 @@ tzlocal==2.1
 urllib3==1.26.4
 watchgod==0.7
 wrapt==1.12.1
-yapf==0.30.0
