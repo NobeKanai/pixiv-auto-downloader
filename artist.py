@@ -4,7 +4,7 @@ from pixivapi.client import Client
 from pixivapi.enums import Size
 from pixivapi.models import Illustration
 from pathlib import Path
-from requests.exceptions import ProxyError
+from requests.exceptions import ProxyError, RequestException
 
 
 class Artist:
@@ -71,7 +71,13 @@ class Artist:
                     self._update_pic_list(illust.id)
                     continue
 
-                illust.download(directory=directory, size=Size.ORIGINAL)
+                try:
+                    illust.download(directory=directory, size=Size.ORIGINAL)
+                except RequestException as e:
+                    logging.error(
+                        f"Download illustration '{illust}' error:{e}")
+                    continue
+
                 # add to path
                 if illust.image_urls[Size.ORIGINAL]:
                     suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
