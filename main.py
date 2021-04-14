@@ -39,7 +39,7 @@ def login(client: Client, username, password):
     logging.info("new token saved to ./.token")
 
 
-def start():
+def init():
     # load configuration
     config_text = open(CONFIG_FILE, 'r', encoding='utf-8').read()
     config = yaml.load(config_text, Loader=Loader)
@@ -84,6 +84,12 @@ def start():
 
     interval = config['service'].get('interval', 600)
     logging.info("start program with interval {} seconds".format(interval))
+
+    return (artists, client, username, password, tg_bot, interval)
+
+
+def start():
+    artists, client, username, password, tg_bot, interval = init()
 
     while True:
         for a in artists:
