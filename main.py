@@ -5,7 +5,6 @@ from pixivapi import Client, errors
 from watchgod import run_process
 from pathlib import Path
 import logging
-import traceback
 import yaml
 import time
 import os
@@ -98,8 +97,8 @@ def start():
             try:
                 paths = a.download()
             except errors.BadApiResponse:
-                traceback.print_exc()
-                logging.info("wait for 20 seconds, and retry")
+                logging.warning(
+                    "download failed. wait for 20 seconds, and retry")
                 time.sleep(20)
                 login(client, username, password)
                 paths = a.download()
