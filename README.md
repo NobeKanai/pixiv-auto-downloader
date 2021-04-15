@@ -1,3 +1,3 @@
 # Pixiv Auto Downloader
 
-Nothing here.
+Pixiv Auto Downloader is a tool I wrote in Python to **remind** and **download** my favorite artist's works.
