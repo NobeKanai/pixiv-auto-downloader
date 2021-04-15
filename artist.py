@@ -1,10 +1,8 @@
-import time
 import logging
 from typing import List
 from pixivapi.client import Client
 from pixivapi.enums import Size
 from pixivapi.models import Illustration
-from pixivapi.errors import BadApiResponse
 from pathlib import Path
 from requests.exceptions import ProxyError, RequestException
 
@@ -147,31 +145,18 @@ class Artist:
 
         # if not initalized fetching, fetch once
         if self._initialized:
-            try:
-                illustrations = self.client.fetch_user_illustrations(
-                    self.artist_id)['illustrations']
-            except BadApiResponse:
-                time.sleep(1)
-                illustrations = self.client.fetch_user_illustrations(
-                    self.artist_id)['illustrations']
-
+            illustrations = self.client.fetch_user_illustrations(
+                self.artist_id)['illustrations']
             if len(illustrations) > self.size:
                 return illustrations[:self.size]
             return illustrations
 
         offset = 0
         while True:
-            try:
-                response = self.client.fetch_user_illustrations(
-                    self.artist_id,
-                    offset=offset,
-                )
-            except BadApiResponse:
-                time.sleep(1)
-                response = self.client.fetch_user_illustrations(
-                    self.artist_id,
-                    offset=offset,
-                )
+            response = self.client.fetch_user_illustrations(
+                self.artist_id,
+                offset=offset,
+            )
 
             ils = response['illustrations']
 
