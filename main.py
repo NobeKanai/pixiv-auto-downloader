@@ -1,3 +1,4 @@
+from cache import load_configs, flush_configs
 from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
@@ -19,8 +20,12 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=os.environ.get("LOG_LEVEL", "INFO"))
 
+# configuration file
 CONFIG_FILE = Path("config.yaml")
 assert CONFIG_FILE.exists()
+
+# some global configurations
+interval = None
 
 
 def login(client: Client, username, password):
@@ -81,39 +86,45 @@ def init():
     bot_config = config['bot']
     tg_bot = TelegramBot(bot_config['token'], bot_config['chatid'])
 
+    global interval
     interval = config['service'].get('interval', 600)
     logging.info("start program with interval {} seconds".format(interval))
 
-    return (artists, client, username, password, tg_bot, interval)
+    return (artists, client, username, password, tg_bot)
+
+
+def run_update():
+    artists, client, username, password, tg_bot = load_configs()
+
+    for a in artists:
+        paths = None
+
+        try:
+            paths = a.download()
+        except errors.BadApiResponse:
+            logging.warning("download failed. wait for 20 seconds, and retry")
+            time.sleep(20)
+            login(client, username, password)
+            paths = a.download()
+
+        if not paths:
+            continue
+
+        try:
+            tg_bot.push_pics(paths)
+            tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
+                a.subdir, len(paths), "works" if len(paths) > 1 else "work"))
+        except Exception as e:
+            logging.error(e)
+
+    flush_configs((artists, client, username, password, tg_bot))
 
 
 def start():
-    artists, client, username, password, tg_bot, interval = init()
+    flush_configs(init())
 
     while True:
-        for a in artists:
-            paths = None
-
-            try:
-                paths = a.download()
-            except errors.BadApiResponse:
-                logging.warning(
-                    "download failed. wait for 20 seconds, and retry")
-                time.sleep(20)
-                login(client, username, password)
-                paths = a.download()
-
-            if not paths:
-                continue
-
-            try:
-                tg_bot.push_pics(paths)
-                tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
-                    a.subdir, len(paths),
-                    "works" if len(paths) > 1 else "work"))
-            except Exception as e:
-                logging.error(e)
-
+        run_update()
         time.sleep(interval)
 
 

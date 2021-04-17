@@ -12,8 +12,18 @@ class TelegramBot:
         push_msg(msg: str)
     """
     def __init__(self, token, chat_id) -> None:
-        self._bot = telegram.Bot(token=token)
+        self.token = token
         self.chat_id = chat_id
+        self._bot = telegram.Bot(token=token)
+
+    def __getstate__(self):
+        result = self.__dict__.copy()
+        del result['_bot']
+        return result
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._bot = telegram.Bot(token=self.token)
 
     def push_pics(self, files: List[Path]):
         # construct all real paths

@@ -6,3 +6,4 @@ __pycache__
 images
 *_test.py
 .pytest_cache
+.tmp
