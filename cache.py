@@ -1,11 +1,9 @@
 from pathlib import Path
 from typing import Tuple
-import platform
 import pickle
 
 # tmp file
-tmp_path = Path("/var/cache/pad") if platform.system() != "Windows" else Path(
-    ".tmp")
+tmp_path = Path(".tmp")
 
 
 def load_configs() -> Tuple:
