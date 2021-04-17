@@ -3,7 +3,7 @@ from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
 from pixivapi import Client, errors
-from watchgod import run_process
+# from watchgod import run_process
 from pathlib import Path
 import logging
 import yaml
@@ -129,4 +129,4 @@ def start():
 
 
 if __name__ == '__main__':
-    run_process(CONFIG_FILE, start)
+    start()
