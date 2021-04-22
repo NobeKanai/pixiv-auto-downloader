@@ -2,7 +2,6 @@ from telegrambot import TelegramBot
 from typing import List
 from artist import Artist
 from pixivapi import Client, errors
-from watchgod import run_process
 from pathlib import Path
 import logging
 import yaml
@@ -81,41 +80,33 @@ def init():
     bot_config = config['bot']
     tg_bot = TelegramBot(bot_config['token'], bot_config['chatid'])
 
-    interval = config['service'].get('interval', 600)
-    logging.info("start program with interval {} seconds".format(interval))
-
-    return (artists, client, username, password, tg_bot, interval)
+    return (artists, client, username, password, tg_bot)
 
 
 def start():
-    artists, client, username, password, tg_bot, interval = init()
+    artists, client, username, password, tg_bot = init()
 
-    while True:
-        for a in artists:
-            paths = None
+    for a in artists:
+        paths = None
 
-            try:
-                paths = a.download()
-            except errors.BadApiResponse:
-                logging.warning(
-                    "download failed. wait for 20 seconds, and retry")
-                time.sleep(20)
-                login(client, username, password)
-                paths = a.download()
+        try:
+            paths = a.download()
+        except errors.BadApiResponse:
+            logging.warning("download failed. wait for 20 seconds, and retry")
+            time.sleep(20)
+            login(client, username, password)
+            paths = a.download()
 
-            if not paths:
-                continue
+        if not paths:
+            continue
 
-            try:
-                tg_bot.push_pics(paths)
-                tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
-                    a.subdir, len(paths),
-                    "works" if len(paths) > 1 else "work"))
-            except Exception as e:
-                logging.error(e)
-
-        time.sleep(interval)
+        try:
+            tg_bot.push_pics(paths)
+            tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
+                a.subdir, len(paths), "works" if len(paths) > 1 else "work"))
+        except Exception as e:
+            logging.error(e)
 
 
 if __name__ == '__main__':
-    run_process(CONFIG_FILE, start)
+    start()
