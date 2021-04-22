@@ -9,7 +9,6 @@ artists:
 service:
   basedir: ./images
   proxy: http://localhost:7890 # optional
-  interval: 3600 # seconds
   username: "your username"
   password: "your password"
   ignored-tags: # optional
