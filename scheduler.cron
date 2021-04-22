@@ -1,2 +1,2 @@
 */30 * * * * python main.py >> /var/log/pad.log 2>&1
-# */30 * * * * docker start pad >> /var/log/pad.log 2>&1
+# */30 * * * * docker start pad
