@@ -1,3 +1,4 @@
+from art import Art
 import logging
 from typing import List
 from pixivapi.client import Client
@@ -10,7 +11,7 @@ from requests.exceptions import ProxyError, RequestException
 class Artist:
     """
     Interface
-        download(): List[Path]
+        download(): List[Art]
     """
     def __init__(self,
                  artist_id: str,
@@ -31,7 +32,7 @@ class Artist:
         # private attributes for private methods
         self._initialized = False
 
-    def download(self) -> List[Path]:
+    def download(self) -> List[Art]:
         """ download start fetch recently updated arts from artist.
         for first time running, it will fetch all pics and compare
         to local folder to find the difference
@@ -49,7 +50,7 @@ class Artist:
         if len(self.pic_list) == 0:
             self._init_pic_list(directory)
 
-        paths = []  # for return
+        arts = []  # for return
 
         try:
             illustrations = self._fetch_user_illustrations()
@@ -81,10 +82,15 @@ class Artist:
                 # add to path
                 if illust.image_urls[Size.ORIGINAL]:
                     suffix = illust.image_urls[Size.ORIGINAL].split('.')[-1]
-                    paths.insert(0,
-                                 directory / (str(illust.id) + '.' + suffix))
+                    arts.insert(
+                        0,
+                        Art(self.subdir,
+                            directory / (str(illust.id) + '.' + suffix),
+                            illust))
                 else:
-                    paths.insert(0, directory / str(illust.id))
+                    arts.insert(
+                        0, Art(self.subdir, directory / str(illust.id),
+                               illust))
 
                 # update pic list
                 self._update_pic_list(illust.id)
@@ -93,7 +99,7 @@ class Artist:
                 f"ProxyError when fetch user '{self.subdir}' illustrations:{e}"
             )
 
-        return paths
+        return arts
 
     def _exists(self, illust_id: int, directory: Path) -> bool:
         if illust_id in self.pic_list:

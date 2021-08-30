@@ -1,74 +1,84 @@
 import logging
-from pathlib import Path
 import time
 from typing import List
+
 import telegram
+
+from art import Art
+
+DEFAULT_TIMEOUT = 60
 
 
 class TelegramBot:
     """
     Interface:
-        push_pics(files: List[Path])
+        push_pics(arts: List[Art])
         push_msg(msg: str)
     """
     def __init__(self, token, chat_id) -> None:
         self._bot = telegram.Bot(token=token)
         self.chat_id = chat_id
 
-    def push_pics(self, files: List[Path]):
+    def push_pics(self, arts: List[Art]):
         # construct all real paths
-        real_paths = []
-        for file in files:
-            if file.is_file():
-                real_paths.append(file)
-            elif file.is_dir():
-                real_paths.append(sorted([f for f in file.iterdir()]))
-            else:
-                logging.warn("unknown file type detected: ", file)
+        for art in arts:
+            if art.path.is_dir():
+                art.path = sorted([f for f in art.path.iterdir()])
 
-        for path in real_paths:
+        for art in arts:
 
             def f():
-                if isinstance(path, list):
-                    self._push_photos(path)
+                if isinstance(art.path, list):
+                    self._push_photos(art.path, art.format())
                 else:
-                    self._push_photo(path)
+                    self._push_photo(art.path, art.format())
 
             self._limit_do(f)
 
     def push_msg(self, msg: str):
         def f():
-            self._bot.send_message(self.chat_id, msg)
+            self._bot.send_message(self.chat_id, msg, timeout=DEFAULT_TIMEOUT)
 
         self._limit_do(f)
 
-    def _push_photos(self, paths):
+    def _push_photos(self, paths, caption):
         try:
             tmp = 0
             media_list = []
             for p in paths:
                 if tmp >= 10:
-                    self._bot.send_media_group(self.chat_id, media_list)
+                    self._bot.send_media_group(self.chat_id,
+                                               media_list,
+                                               timeout=DEFAULT_TIMEOUT)
 
                     tmp = 0
                     media_list.clear()
 
-                media_list.append(telegram.InputMediaPhoto(open(p, "rb")))
+                media_list.append(
+                    telegram.InputMediaPhoto(open(p, "rb"), caption=caption))
                 tmp += 1
 
-            self._bot.send_media_group(self.chat_id, media_list)
+            self._bot.send_media_group(self.chat_id,
+                                       media_list,
+                                       timeout=DEFAULT_TIMEOUT)
 
         except telegram.error.BadRequest as e:
             logging.warning("bad requeset with error message: " + e.message)
             for p in paths:
                 self._bot.send_document(self.chat_id, open(p, 'rb'))
 
-    def _push_photo(self, path):
+    def _push_photo(self, path, caption):
         try:
-            self._bot.send_photo(self.chat_id, open(path, 'rb'))
+            self._bot.send_photo(self.chat_id,
+                                 open(path, 'rb'),
+                                 caption=caption,
+                                 timeout=DEFAULT_TIMEOUT)
         except telegram.error.BadRequest as e:
             logging.warning("bad requeset with error message: " + e.message)
-            self._bot.send_document(self.chat_id, open(path, 'rb'))
+            self._bot.send_document(self.chat_id,
+                                    open(path, 'rb'),
+                                    caption=caption,
+                                    timeout=DEFAULT_TIMEOUT)
 
     def _limit_do(self, f):
         try_times = 0

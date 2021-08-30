@@ -87,23 +87,21 @@ def start():
     artists, client, username, password, tg_bot = init()
 
     for a in artists:
-        paths = None
+        arts = None
 
         try:
-            paths = a.download()
+            arts = a.download()
         except errors.BadApiResponse:
             logging.warning("download failed. wait for 20 seconds, and retry")
             time.sleep(20)
             login(client, username, password)
-            paths = a.download()
+            arts = a.download()
 
-        if not paths:
+        if not arts:
             continue
 
         try:
-            tg_bot.push_pics(paths)
-            tg_bot.push_msg("Artist {} updated {} {}. All saved.".format(
-                a.subdir, len(paths), "works" if len(paths) > 1 else "work"))
+            tg_bot.push_pics(arts)
         except Exception as e:
             logging.error(e)
 
