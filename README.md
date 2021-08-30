@@ -19,3 +19,4 @@ Perfer any path to copy `docker-compose.yml` to. Almost all configuration option
 
 Just run `docker-compose up -d` to start a service which gonna run forever unless you shutdown it if you build image with `main` branch. You may perfer to run with `task-mode`, which will perform only one task any time it starts, so to configure with some tools like `crontab` would be helpful.
 
+**NOTICE**: `task-mode` is now merged into `main` branch.
