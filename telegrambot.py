@@ -24,8 +24,7 @@ class TelegramBot:
             elif file.is_dir():
                 real_paths.append(sorted([f for f in file.iterdir()]))
             else:
-                logging.warn(
-                    "what the fuck happened with this holly shit file: ", file)
+                logging.warn("unknown file type detected: ", file)
 
         for path in real_paths:
 
