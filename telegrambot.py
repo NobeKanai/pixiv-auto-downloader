@@ -54,8 +54,13 @@ class TelegramBot:
                     tmp = 0
                     media_list.clear()
 
-                media_list.append(
-                    telegram.InputMediaPhoto(open(p, "rb"), caption=caption))
+                # set caption property only for the first element of an array
+                if len(media_list) == 0:
+                    media_list.append(
+                        telegram.InputMediaPhoto(open(p, "rb"),
+                                                 caption=caption))
+                else:
+                    media_list.append(telegram.InputMediaPhoto(open(p, "rb")))
                 tmp += 1
 
             self._bot.send_media_group(self.chat_id,
