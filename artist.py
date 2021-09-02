@@ -50,6 +50,10 @@ class Artist:
         if len(self.pic_list) == 0:
             self._init_pic_list(directory)
 
+        # prevent redundant requests
+        if len(self.pic_list) >= self.size:
+            self._initialized = True
+
         arts = []  # for return
 
         try:
