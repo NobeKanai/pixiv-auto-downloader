@@ -86,9 +86,9 @@ class TelegramBot:
                                     timeout=DEFAULT_TIMEOUT)
 
     def _limit_do(self, f):
-        try_times = 0
+        trying_times = 0
         while True:
-            if try_times >= 3:
+            if trying_times >= 3:
                 logging.warning("too much retry times... skipped")
                 break
 
@@ -100,12 +100,13 @@ class TelegramBot:
                         e.retry_after))
                 time.sleep(e.retry_after)
 
-                try_times += 1
+                trying_times += 1
                 continue
 
             except telegram.error.TimedOut:
                 logging.warning("telegram server time out: retry after 20s.")
                 time.sleep(20)
 
+                trying_times += 1
                 continue
             break
