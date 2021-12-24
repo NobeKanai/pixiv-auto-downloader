@@ -1,12 +1,14 @@
-from telegrambot import TelegramBot
-from typing import List
-from artist import Artist
-from pixivapi import Client, errors
-from pathlib import Path
 import logging
-import yaml
-import time
 import os
+from pathlib import Path
+import time
+from typing import List, cast
+
+from pixivapi import Client, errors
+import yaml
+
+from artist import Artist
+from telegrambot import TelegramBot
 
 try:
     from yaml import CLoader as Loader
@@ -33,7 +35,7 @@ def login(client: Client, username, password):
 
     # save token
     with open('.token', 'w', encoding='utf-8') as f:
-        f.write(client.refresh_token)
+        f.write(cast(str, client.refresh_token))
     logging.info("new token saved to ./.token")
 
 

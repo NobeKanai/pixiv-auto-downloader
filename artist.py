@@ -1,11 +1,13 @@
-from art import Art
 import logging
+from pathlib import Path
 from typing import List
+
 from pixivapi.client import Client
 from pixivapi.enums import Size
 from pixivapi.models import Illustration
-from pathlib import Path
 from requests.exceptions import ProxyError, RequestException
+
+from art import Art
 
 
 class Artist:
